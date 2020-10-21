@@ -1,48 +1,22 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Login.aspx.cs" Inherits="Login" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true" CodeFile="Login.aspx.cs" Inherits="Login" %>
 
-<!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-   <title></title>
-</head>
-<body style="font-family: Arial, Helvetica, sans-serif; font-size: small">
-   <form id="form1" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" Runat="Server">
       <div>
-         <h4 style="font-size: medium">Log In</h4>
+         <h1>Log In</h1>
          <hr />
-         <asp:PlaceHolder runat="server" ID="LoginStatus" Visible="false">
-            <p>
-               <asp:Literal runat="server" ID="StatusText" />
-            </p>
-         </asp:PlaceHolder>
-         <asp:PlaceHolder runat="server" ID="LoginForm" Visible="false">
-            <div style="margin-bottom: 10px">
-               <asp:Label runat="server" AssociatedControlID="UserName">User name</asp:Label>
-               <div>
-                  <asp:TextBox runat="server" ID="UserName" />
-               </div>
-            </div>
-            <div style="margin-bottom: 10px">
-               <asp:Label runat="server" AssociatedControlID="Password">Password</asp:Label>
-               <div>
-                  <asp:TextBox runat="server" ID="Password" TextMode="Password" />
-               </div>
-            </div>
-            <div style="margin-bottom: 10px">
-               <div>
-                  <asp:Button runat="server" OnClick="SignIn" Text="Log in" />
-               </div>
-            </div>
-         </asp:PlaceHolder>
-         <asp:PlaceHolder runat="server" ID="LogoutButton" Visible="false">
-            <div>
-               <div>
-                  <asp:Button runat="server" OnClick="SignOut" Text="Log out" />
-               </div>
-            </div>
-         </asp:PlaceHolder>
+         <asp:Label ID="StatusText" runat="server"></asp:Label>
+    <p>
+        Username:
+        <asp:TextBox ID="UserName" runat="server"></asp:TextBox></p>
+    <p>
+        Password:
+        <asp:TextBox ID="Password" runat="server" TextMode="Password"></asp:TextBox></p>
+    <p>
+        <asp:CheckBox ID="RememberMe" runat="server" Text="Remember Me" /> </p>
+    <p>
+        <asp:Button ID="LoginButton" runat="server" Text="Login" OnClick="SignIn" /> </p>
+    <p>
+        <asp:Label ID="InvalidCredentialsMessage" runat="server" ForeColor="Red" Text="Your username or password is invalid. Please try again."
+            Visible="False"></asp:Label> </p>
       </div>
-   </form>
-</body>
-</html>
+</asp:Content>
