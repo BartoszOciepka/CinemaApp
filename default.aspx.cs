@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Configuration;
 using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 public partial class _default : System.Web.UI.Page
 {
@@ -13,7 +7,10 @@ public partial class _default : System.Web.UI.Page
 	{
 		if (Request.IsAuthenticated)
 		{
+
 			WelcomeBackMessage.Text = "Welcome back " + User.Identity.Name;
+			UserEmail.Text = Membership.GetUser(User.Identity.Name).Email;
+
 
 			AuthenticatedMessagePanel.Visible = true;
 			AnonymousMessagePanel.Visible = false;
@@ -33,5 +30,15 @@ public partial class _default : System.Web.UI.Page
 
 		Response.Cookies[FormsAuthentication.FormsCookieName].Expires = DateTime.Now.AddDays(-1);
 		FormsAuthentication.RedirectToLoginPage();
+	}
+
+	protected void ChangeEmailButton_Click(object sender, EventArgs e)
+	{
+		//VALIDATE
+		string newEmail = NewEmail.Text;
+		MembershipUser u = Membership.GetUser(User.Identity.Name);
+		u.Email = newEmail;
+		Membership.UpdateUser(u);
+		Response.Redirect(Request.RawUrl);
 	}
 }
