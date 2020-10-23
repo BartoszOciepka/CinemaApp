@@ -39,13 +39,10 @@ public partial class Default2 : System.Web.UI.Page
 			DataTable ds = new DataTable();
 			da.Fill(ds);
 			return ds;
-			Console.Read();
-			read.Close();
 		}
 		catch (Exception ex)
 		{
 			Console.Write(ex);
-			Console.Read();
 			return null;
 		}
 	}
