@@ -113,7 +113,5 @@ public partial class AddHall : System.Web.UI.Page
 		MySqlCommand command = new MySqlCommand(deleteQuery, connect);
 		command.ExecuteNonQuery();
 		DisplayHallsInGrid();
-
-
 	}
 }
