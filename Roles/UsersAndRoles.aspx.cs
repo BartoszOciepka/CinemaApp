@@ -41,12 +41,12 @@ public partial class Roles_UsersAndRoles : System.Web.UI.Page
 		string selectedUserName = UserList.SelectedValue;
 		string[] selectedUsersRoles = Roles.GetRolesForUser(selectedUserName);
 
-		// Loop through the Repeater's Items and check or uncheck the checkbox as needed 
-
+		// Loop through the Repeater's Items and check or uncheck the checkbox as needed
 		foreach (RepeaterItem ri in UsersRoleList.Items)
 		{
 			// Programmatically reference the CheckBox 
 			CheckBox RoleCheckBox = ri.FindControl("RoleCheckBox") as CheckBox;
+			
 			// See if RoleCheckBox.Text is in selectedUsersRoles 
 			if (selectedUsersRoles.Contains<string>(RoleCheckBox.Text))
 				RoleCheckBox.Checked = true;
@@ -67,7 +67,6 @@ public partial class Roles_UsersAndRoles : System.Web.UI.Page
 
 		// Get the currently selected user and role 
 		string selectedUserName = UserList.SelectedValue;
-
 		string roleName = RoleCheckBox.Text;
 
 		// Determine if we need to add or remove the user from this role 
@@ -75,6 +74,7 @@ public partial class Roles_UsersAndRoles : System.Web.UI.Page
 		{
 			// Add the user to the role 
 			Roles.AddUserToRole(selectedUserName, roleName);
+			
 			// Display a status message 
 			ActionStatus.Text = string.Format("User <b>{0}</b> was added to role <b>{1}</b>.", selectedUserName, roleName);
 		}
@@ -82,6 +82,7 @@ public partial class Roles_UsersAndRoles : System.Web.UI.Page
 		{
 			// Remove the user from the role 
 			Roles.RemoveUserFromRole(selectedUserName, roleName);
+			
 			// Display a status message 
 			ActionStatus.Text = string.Format("User <b>{0}</b> was removed from role <b>{1}</b>.", selectedUserName, roleName);
 
