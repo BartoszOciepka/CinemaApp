@@ -13,6 +13,7 @@ public partial class Roles_ManageRoles : System.Web.UI.Page
 		if (!Page.IsPostBack)
 			DisplayRolesInGrid();
 	}
+	
 	protected void CreateRoleButton_Click(object sender, EventArgs e)
 	{
 		string newRoleName = RoleName.Text.Trim();
@@ -20,8 +21,8 @@ public partial class Roles_ManageRoles : System.Web.UI.Page
 		if (!Roles.RoleExists(newRoleName))
 			// Create the role
 			Roles.CreateRole(newRoleName);
+			
 		DisplayRolesInGrid();
-
 		RoleName.Text = string.Empty;
 	}
 
