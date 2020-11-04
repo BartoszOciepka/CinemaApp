@@ -19,10 +19,12 @@ public partial class AddReservation : System.Web.UI.Page
 			BindTicketToTicketList();
 		}
 	}
+	
 	protected void TicketList_SelectedIndexChanged(object sender, EventArgs e)
 	{
 
 	}
+	
 	protected void CreateReservationButton_Click(object sender, EventArgs e)
 	{
 		string date = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
@@ -32,9 +34,12 @@ public partial class AddReservation : System.Web.UI.Page
 
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
+		
 		string useDatabase = string.Format("Use cinema");
 		string query = "INSERT INTO reservation VALUES (NULL, " + ticket_id + ", \"" + date + "\",\"" + time + "\", " + client_id + ");";
+		
 		MySqlCommand command = new MySqlCommand(query, connect);
+		
 		try
 		{
 			connect.Open();
@@ -42,7 +47,6 @@ public partial class AddReservation : System.Web.UI.Page
 			connect.Close();
 		}
 		catch (Exception ex) { }
-
 	}
 
 	private void BindTicketToTicketList()
@@ -52,6 +56,7 @@ public partial class AddReservation : System.Web.UI.Page
 		string useDatabase = string.Format("Use cinema");
 		string query = "SELECT * FROM ticket;";
 		MySqlCommand command = new MySqlCommand(query, connect);
+		
 		try
 		{
 			MySqlDataAdapter da = new MySqlDataAdapter(command);

@@ -13,6 +13,7 @@ public partial class AddShowing : System.Web.UI.Page
 {
 	MySqlConnection connect;
 	MySqlDataReader read;
+	
 	protected void Page_Load(object sender, EventArgs e)
 	{
 		if (!Page.IsPostBack)
@@ -26,6 +27,7 @@ public partial class AddShowing : System.Web.UI.Page
 	{
 
 	}
+	
 	protected void HallList_SelectedIndexChanged(object sender, EventArgs e)
 	{
 
@@ -40,6 +42,7 @@ public partial class AddShowing : System.Web.UI.Page
 		string hour = Regex.Match(txtDatePicker.Text, "..(?=:)").ToString().Trim();
 		string minute = Regex.Match(txtDatePicker.Text, ":(..)").ToString().Trim().Substring(1,2);
 		string ampm = txtDatePicker.Text.Substring(16, 2);
+		
 		if (ampm == "PM") hour = (Int32.Parse(hour) + 12).ToString();
 
 		string date = year + "-" + month + "-" + day;
@@ -106,13 +109,17 @@ public partial class AddShowing : System.Web.UI.Page
 
 		}
 	}
+	
 	private void BindHallsToHallList()
 	{
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
+		
 		string useDatabase = string.Format("Use cinema");
 		string query = "SELECT * FROM hall;";
+		
 		MySqlCommand command = new MySqlCommand(query, connect);
+		
 		try
 		{
 			MySqlDataAdapter da = new MySqlDataAdapter(command);
@@ -127,16 +134,18 @@ public partial class AddShowing : System.Web.UI.Page
 		{
 
 		}
-
 	}
 
 	private void BindFilmsToFilmList()
 	{
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
+		
 		string useDatabase = string.Format("Use cinema");
 		string query = "SELECT * FROM film;";
+		
 		MySqlCommand command = new MySqlCommand(query, connect);
+		
 		try
 		{
 			MySqlDataAdapter da = new MySqlDataAdapter(command);
@@ -151,6 +160,5 @@ public partial class AddShowing : System.Web.UI.Page
 		{
 
 		}
-
 	}
 }

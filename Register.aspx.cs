@@ -14,12 +14,15 @@ public partial class Register : System.Web.UI.Page
 	protected void CreateAccountButton_Click(object sender, EventArgs e)
 	{
 		MembershipCreateStatus createStatus;
+		
 		if (!IsValidEmail(Email.Text))
 		{
 			StatusMessage.Text = "There email address you provided in invalid.";
 			return;
 		}
+		
 		MembershipUser newUser = Membership.CreateUser(Username.Text, Password.Text, Email.Text, passwordQuestion, SecurityAnswer.Text, true, out createStatus);
+		
 		switch (createStatus)
 		{
 			case MembershipCreateStatus.Success:
