@@ -1,9 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -11,6 +8,7 @@ public partial class AddHall : System.Web.UI.Page
 {
 	MySqlConnection connect;
 	MySqlDataReader read;
+	string connectionString = "Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;";
 	protected void Page_Load(object sender, EventArgs e)
 	{
 		if (!Page.IsPostBack)
@@ -19,7 +17,6 @@ public partial class AddHall : System.Web.UI.Page
 
 	private void DisplayHallsInGrid()
 	{
-
 		HallList.DataSource = getAllHalls().DefaultView;
 		HallList.DataMember = "name";
 		HallList.DataBind();
@@ -28,9 +25,8 @@ public partial class AddHall : System.Web.UI.Page
 	private DataTable getAllHalls()
 	{
 		connect = new MySqlConnection();
-		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
+		connect.ConnectionString = string.Format(connectionString);
 		connect.Open();
-		string useDatabase = string.Format("Use cinema");
 		string query = "SELECT * FROM hall;";
 		MySqlCommand command = new MySqlCommand(query, connect);
 		try
@@ -39,13 +35,10 @@ public partial class AddHall : System.Web.UI.Page
 			DataTable ds = new DataTable();
 			da.Fill(ds);
 			return ds;
-			Console.Read();
-			read.Close();
 		}
 		catch (Exception ex)
 		{
 			Console.Write(ex);
-			Console.Read();
 			return null;
 		}
 	}
@@ -54,8 +47,31 @@ public partial class AddHall : System.Web.UI.Page
 	{
 		//VALIDATE
 		string hallNumber = HallNumber.Text;
+
 		string rowNumber = RowNumber.Text;
 		string seatsNumber = SeatsNumber.Text;
+		try
+		{
+			if(Int32.Parse(hallNumber)<=0)
+			{
+				Status.Text = "Hall number can't be lower or equal 0";
+				return;
+			}
+			if (Int32.Parse(rowNumber) <= 0)
+			{
+				Status.Text = "Row number can't be lower or equal 0";
+				return;
+			}
+			if(Int32.Parse(seatsNumber) <=0)
+			{
+				Status.Text = "Seat number can't be lower or equal 0";
+				return;
+			}
+		}
+		catch(Exception ex)
+		{
+			Status.Text = ex.Message;
+		}
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
 		connect.Open();

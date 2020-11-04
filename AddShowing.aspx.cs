@@ -1,18 +1,13 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 public partial class AddShowing : System.Web.UI.Page
 {
 	MySqlConnection connect;
-	MySqlDataReader read;
+	string connectionString = "Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;";
 	protected void Page_Load(object sender, EventArgs e)
 	{
 		if (!Page.IsPostBack)
@@ -22,15 +17,8 @@ public partial class AddShowing : System.Web.UI.Page
 		}
 	}
 
-	protected void FilmList_SelectedIndexChanged(object sender, EventArgs e)
-	{
-
-	}
-	protected void HallList_SelectedIndexChanged(object sender, EventArgs e)
-	{
-
-	}
-
+	protected void FilmList_SelectedIndexChanged(object sender, EventArgs e){	}
+	protected void HallList_SelectedIndexChanged(object sender, EventArgs e){	}
 	protected void CreateShowingButton_Click(object sender, EventArgs e)
 	{
 		//VALIDATE
@@ -48,63 +36,7 @@ public partial class AddShowing : System.Web.UI.Page
 		string hallNumber = HallList.SelectedValue;
 		string filmName = FilmList.SelectedValue;
 
-		connect = new MySqlConnection();
-		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
-		string useDatabase = string.Format("Use cinema");
-
-		try
-		{
-			string query = "SELECT * FROM hall WHERE number =" + hallNumber + ";";
-			MySqlCommand command = new MySqlCommand(query, connect);
-			MySqlDataAdapter da = new MySqlDataAdapter(command);
-			DataTable ds = new DataTable();
-			da.Fill(ds);
-			int seats = Int32.Parse(ds.Rows[0]["seats"].ToString());
-			int rows = Int32.Parse(ds.Rows[0]["rows"].ToString());
-			int hallID = Int32.Parse(ds.Rows[0]["hall_id"].ToString());
-
-			query = "SELECT * FROM film WHERE name =\"" + filmName + "\";";
-			command = new MySqlCommand(query, connect);
-			da = new MySqlDataAdapter(command);
-			ds = new DataTable();
-			da.Fill(ds);
-			int film_id = Int32.Parse(ds.Rows[0]["film_id"].ToString());
-
-			//VALIDATE
-			query = "INSERT INTO showing VALUES (NULL, \"" + date + "\",\"" + time +
-				"\"," + hallID + "," + film_id + ");";
-			connect.Open();
-			command = new MySqlCommand(query, connect);
-			command.ExecuteReader();
-			connect.Close();
-
-			query = "SELECT * FROM showing WHERE hall_id=" + hallID + " AND film_id=" + film_id + 
-				" AND date =\"" + date + "\" AND time = \"" + time + "\";";
-			command = new MySqlCommand(query, connect);
-			da = new MySqlDataAdapter(command);
-			ds = new DataTable();
-			da.Fill(ds);
-			int showing_id = Int32.Parse(ds.Rows[0]["showing_id"].ToString());
-
-			for (int i = 1; i <= seats; i++)
-			{
-				for(int j = 1; j <= rows; j++)
-				{
-					//VALIDATE
-					query = "INSERT INTO ticket VALUES (NULL, " + j + "," + i +
-					"," + showing_id + ");";
-					connect.Open();
-					command = new MySqlCommand(query, connect);
-					command.ExecuteReader();
-					connect.Close();
-				}
-			}
-
-		}
-		catch(Exception ex)
-		{
-
-		}
+		AddShowingToDatabase(hallNumber, filmName, date, time);
 	}
 	private void BindHallsToHallList()
 	{
@@ -123,13 +55,10 @@ public partial class AddShowing : System.Web.UI.Page
 			HallList.DataValueField = "number";
 			HallList.DataBind();
 		}
-		catch (Exception ex)
-		{
-
+		catch (Exception ex){
+			Console.Write(ex.Message);
 		}
-
 	}
-
 	private void BindFilmsToFilmList()
 	{
 		connect = new MySqlConnection();
@@ -147,10 +76,103 @@ public partial class AddShowing : System.Web.UI.Page
 			FilmList.DataValueField = "name";
 			FilmList.DataBind();
 		}
-		catch (Exception ex)
+		catch (Exception ex){
+			Console.Write(ex.Message);
+		}
+	}
+	private void AddShowingToDatabase(string hallNumber, string filmName, string date, string time) {
+		connect = new MySqlConnection();
+		connect.ConnectionString = string.Format(connectionString);
+
+		DataTable dataTable = new DataTable();
+		MySqlCommand command = new MySqlCommand();
+		try
 		{
 
-		}
+			int seats = GetSeatsByHallName(command, connect, hallNumber);
+			int rows = GetRowsByHallName(command, connect, hallNumber);
+			int hallID = GetHallIDByHallName(command, connect, hallNumber);
 
+			int film_id = GetFilmIdByName(command, connect, filmName);
+
+			//VALIDATE
+			int showing_id = AddShowingToDatabase(command, connect, hallID.ToString(), film_id.ToString(), date, time);
+
+			for (int i = 1; i <= seats; i++)
+			{
+				for (int j = 1; j <= rows; j++)
+				{
+					//VALIDATE
+					ValidateTickets();
+					GenerateTickets(command, connect, j, i, showing_id);
+				}
+			}
+		}
+		catch (Exception ex){
+			Console.Write(ex.Message);
+		}
+	}
+	private void GenerateTickets(MySqlCommand command, MySqlConnection connect, int row, int seat, int showing_id)
+	{
+		string query = "INSERT INTO ticket VALUES (NULL, " + row + "," + seat + "," + showing_id + ");";
+		connect.Open();
+		command = new MySqlCommand(query, connect);
+		command.ExecuteReader();
+		connect.Close();
+	}
+	private void ValidateTickets() { }
+	private int AddShowingToDatabase(MySqlCommand command, MySqlConnection connect, string hall_id, string film_id, string date, string time)
+	{
+		string query = "INSERT INTO showing VALUES (NULL, \"" + date + "\",\"" + time +
+				"\"," + hall_id + "," + film_id + ");";
+		connect.Open();
+		command = new MySqlCommand(query, connect);
+		command.ExecuteReader();
+		connect.Close();
+
+		query = "SELECT * FROM showing WHERE hall_id=" + hall_id + " AND film_id=" + film_id +
+			" AND date =\"" + date + "\" AND time = \"" + time + "\";";
+		command = new MySqlCommand(query, connect);
+		MySqlDataAdapter da = new MySqlDataAdapter(command);
+		DataTable dataTable = new DataTable();
+		da.Fill(dataTable);
+		return Int32.Parse(dataTable.Rows[0]["showing_id"].ToString());
+	}
+	private int GetFilmIdByName(MySqlCommand command, MySqlConnection connect, string filmName)
+	{
+		//VALIDATE
+		string query = "SELECT * FROM film WHERE name =\"" + filmName + "\";";
+		command = new MySqlCommand(query, connect);
+		MySqlDataAdapter da = new MySqlDataAdapter(command);
+		DataTable dataTable = new DataTable();
+		da.Fill(dataTable);
+		return Int32.Parse(dataTable.Rows[0]["film_id"].ToString());
+	}
+	private int GetSeatsByHallName(MySqlCommand command, MySqlConnection connect, string hallNumber)
+	{
+		string query = "SELECT * FROM hall WHERE number =" + hallNumber + ";";
+		command = new MySqlCommand(query, connect);
+		MySqlDataAdapter da = new MySqlDataAdapter(command);
+		DataTable dataTable = new DataTable();
+		da.Fill(dataTable);
+		return Int32.Parse(dataTable.Rows[0]["seats"].ToString());
+	}
+	private int GetRowsByHallName(MySqlCommand command, MySqlConnection connect, string hallNumber)
+	{
+		string query = "SELECT * FROM hall WHERE number =" + hallNumber + ";";
+		command = new MySqlCommand(query, connect);
+		MySqlDataAdapter da = new MySqlDataAdapter(command);
+		DataTable dataTable = new DataTable();
+		da.Fill(dataTable);
+		return Int32.Parse(dataTable.Rows[0]["rows"].ToString());
+	}
+	private int GetHallIDByHallName(MySqlCommand command, MySqlConnection connect, string hallNumber)
+	{
+		string query = "SELECT * FROM hall WHERE number =" + hallNumber + ";";
+		command = new MySqlCommand(query, connect);
+		MySqlDataAdapter da = new MySqlDataAdapter(command);
+		DataTable dataTable = new DataTable();
+		da.Fill(dataTable);
+		return Int32.Parse(dataTable.Rows[0]["hall_id"].ToString());
 	}
 }
