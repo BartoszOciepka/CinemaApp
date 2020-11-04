@@ -14,8 +14,8 @@ public partial class AddReservation : System.Web.UI.Page
 	{
 		if (!Page.IsPostBack)
 		{
+			CheckReservationTimes(command);
 			BindTicketToTicketList();
-			CheckReservationTimes(command, connect);
 		}
 	}
 	protected void TicketList_SelectedIndexChanged(object sender, EventArgs e)
@@ -27,32 +27,69 @@ public partial class AddReservation : System.Web.UI.Page
 
 		string date = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
 		string time = DateTime.Now.Hour + ":" + DateTime.Now.Minute;
-		string ticket_id = TicketList.SelectedValue;
+		string[] ticketList = TicketList.SelectedValue.Split(' ');
+		string ticket_id = ticketList[0];
 		string client_id = Membership.GetUser(User.Identity.Name).ProviderUserKey.ToString();
 		
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format(connectionString);
 
-		CheckReservationTimes(command, connect);
+		CheckReservationTimes(command );
 		ValidateReservation(ticket_id, client_id);
 		AddReservationToDatabase(command, connect, ticket_id, client_id, date, time);
+		MessageBox.Text = "Added reservation";
+
 	}
 
 	private void BindTicketToTicketList()
 	{
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
-		string query = "SELECT * FROM ticket;";
+		string query = "SELECT * FROM ticket WHERE ticket_id NOT IN(SELECT ticket_id FROM reservation);";
 		MySqlCommand command = new MySqlCommand(query, connect);
 		try
 		{
-			MySqlDataAdapter da = new MySqlDataAdapter(command);
-			DataTable ds = new DataTable();
-			da.Fill(ds);
-			TicketList.DataSource = ds.DefaultView;
-			TicketList.DataTextField = "ticket_id";
-			TicketList.DataValueField = "ticket_id";
-			TicketList.DataBind();
+			connect.Open();
+			using (MySqlDataReader reader = command.ExecuteReader())
+			{
+				while (reader.Read())
+				{
+					MySqlConnection filmConnect = new MySqlConnection();
+					MySqlConnection dateConnect = new MySqlConnection();
+					try
+					{
+						
+						filmConnect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
+						filmConnect.Open();
+						string filmNameQuery = "SELECT * FROM film WHERE film_id=(SELECT film_id FROM showing WHERE showing_id=" + reader.GetString(3) + ");";
+						command = new MySqlCommand(filmNameQuery, filmConnect);
+						MySqlDataReader filmReader = command.ExecuteReader();
+						filmReader.Read();
+						
+						dateConnect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
+						dateConnect.Open();
+						string dateQuery = "SELECT * FROM showing WHERE showing_id=" + reader.GetString(3) + ";";
+						command = new MySqlCommand(dateQuery, dateConnect);
+						MySqlDataReader dateReader = command.ExecuteReader();
+						filmReader.Read();
+						dateReader.Read();
+						TicketList.Items.Add(reader.GetString(0) + " " + filmReader.GetString(1) + " " + dateReader.GetString(1).Substring(0, 8) + " " + dateReader.GetString(2).Substring(0, 5) + " rzad:" + reader.GetString(1) + " miejsce:" + reader.GetString(2));
+					}
+					finally{
+						dateConnect.Close();
+						filmConnect.Close();
+					}
+				}
+			}
+			connect.Close();
+			//MySqlDataAdapter da = new MySqlDataAdapter(command);
+			//DataTable ds = new DataTable();
+			//da.Fill(ds);
+			//TicketList.Items.Add("tesT");
+			//TicketList.DataSource = ds.DefaultView;
+			//TicketList.DataTextField = "ticket_id";
+			//TicketList.DataValueField = "ticket_id";
+			//TicketList.DataBind();
 		}
 		catch (Exception ex)
 		{
@@ -78,8 +115,11 @@ public partial class AddReservation : System.Web.UI.Page
 			Console.Write(ex.Message);
 		}
 	}
-	private void CheckReservationTimes(MySqlCommand command, MySqlConnection connect)
+	private void CheckReservationTimes(MySqlCommand command)
 	{
+
+		MySqlConnection connect = new MySqlConnection();
+		connect.ConnectionString = string.Format(connectionString);
 		string query = "SELECT * FROM reservation";
 		DateTime now = DateTime.Now;
 		try

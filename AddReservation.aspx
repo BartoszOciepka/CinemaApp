@@ -7,5 +7,6 @@
 			</asp:DropDownList>
 	<br />
 	<asp:Button ID="CreateReservationButton" runat="server" Text="Create Reservation" OnClick="CreateReservationButton_Click" />
+	<asp:Label ID="MessageBox" runat="server" />
 </asp:Content>
 

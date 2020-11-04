@@ -47,8 +47,31 @@ public partial class AddHall : System.Web.UI.Page
 	{
 		//VALIDATE
 		string hallNumber = HallNumber.Text;
+
 		string rowNumber = RowNumber.Text;
 		string seatsNumber = SeatsNumber.Text;
+		try
+		{
+			if(Int32.Parse(hallNumber)<=0)
+			{
+				Status.Text = "Hall number can't be lower or equal 0";
+				return;
+			}
+			if (Int32.Parse(rowNumber) <= 0)
+			{
+				Status.Text = "Row number can't be lower or equal 0";
+				return;
+			}
+			if(Int32.Parse(seatsNumber) <=0)
+			{
+				Status.Text = "Seat number can't be lower or equal 0";
+				return;
+			}
+		}
+		catch(Exception ex)
+		{
+			Status.Text = ex.Message;
+		}
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
 		connect.Open();

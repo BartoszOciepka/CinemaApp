@@ -1,9 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -49,6 +46,11 @@ public partial class Default2 : System.Web.UI.Page
 	public void CreateFilmButton_Click(object sender, EventArgs e) {
 
 		string filmName = FilmName.Text;
+		if(filmName.Length <= 0)
+		{
+			Status.Text = "Film name must be longer than";
+			return;
+		}
 		connect = new MySqlConnection();
 		connect.ConnectionString = string.Format("Server=localhost;Port=3306;Database=cinema;Uid=root;Pwd=root;");
 		connect.Open();
